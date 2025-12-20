@@ -1,0 +1,121 @@
+body {
+    margin: 0;
+    padding: 0;
+    width: 1920px;
+    height: 1080px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    background: linear-gradient(-45deg, #ff0033, #ff0066, #ff0044, #ff0080);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+}
+
+h1{
+    font-family: "Orbitron";
+    color: white;
+    text-shadow: 5px 5px 8px rgba(0, 0, 0, 0.6);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.controls {
+    margin-top: 20px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    position: absolute;
+    bottom: 20px;
+}
+
+.controls button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.controls button:hover {
+    background: #444;
+}
+
+.timer-container {
+    background: rgba(255, 255, 255, 0.13);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 40px 80px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+#countdown {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 84px;
+    color: white;
+    text-align: center;
+    min-width: 300px;
+    text-shadow: 5px 5px 8px rgba(0, 0, 0, 0.6);
+    position: relative;
+}
+
+.digit-container {
+    display: inline-block;
+    position: relative;
+    width: 0.8em;
+    height: 1.2em;
+    text-align: center;
+    vertical-align: middle;
+    margin: 0 0.1em;
+}
+
+.digit {
+    display: inline-block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotateX(0deg);
+    opacity: 1;
+    transform-origin: center;
+    backface-visibility: hidden;
+    transition: all 0.4s ease-out;
+    min-width: 0.8em;
+}
+
+.digit.out {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotateX(-90deg);
+}
+
+.digit.in {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotateX(90deg);
+}
+
+.colon {
+    display: inline-block;
+    margin: 0 0.3em;
+    vertical-align: middle;
+    position: relative;
+    top: -0.05em;
+}
