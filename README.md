@@ -1,4 +1,4 @@
-## Why?
+# Why?
 Idk... It's cool
 
 # Is it made by AI?
