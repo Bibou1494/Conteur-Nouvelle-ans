@@ -32,30 +32,6 @@ html, body {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
-.controls {
-    margin-top: 20px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 5px;
-    position: absolute;
-    bottom: 20px;
-}
-
-.controls button {
-    padding: 10px 20px;
-    margin: 0 10px;
-    font-size: 16px;
-    cursor: pointer;
-    background: #333;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    transition: background 0.3s;
-}
-
-.controls button:hover {
-    background: #444;
-}
 
 .timer-container {
     background: rgba(255, 255, 255, 0.13);
