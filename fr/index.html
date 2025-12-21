@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Décompte du Nouvel An</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
 </head>
 <body>
     <h1>Compte à rebours jusqu'au Nouvel An 2026</h1>
     <div class="timer-container">
         <div id="countdown">99j 99:99:99</div>
+    </div>
+    <div class="controls">
+        <button onclick="setTestSeconds(5)">Test 5s</button>
+        <button onclick="startConfetti(5000)">Confettis</button>
     </div>
     <script src="script.js"></script>
 </body>

@@ -2,6 +2,21 @@
     const display = document.getElementById('countdown');
     let intervalId = null;
     let currentTime = null;
+    // mode test via param ?time_remaining=SECONDES or via setTestSeconds(seconds)
+    let testMode = false;
+    let testSeconds = 0;
+    let testStart = 0;
+    (function parseTestParam(){
+        try {
+            const p = new URLSearchParams(window.location.search);
+            if (p.has('time_remaining')) {
+                const v = parseInt(p.get('time_remaining'), 10);
+                if (!Number.isNaN(v) && v >= 0) {
+                    testMode = true; testSeconds = v; testStart = Date.now();
+                }
+            }
+        } catch (e) { /* ignore */ }
+    })();
 
     function createDigitContainer(digit) {
         return `<div class="digit-container"><span class="digit">${digit}</span></div>`;
@@ -18,20 +33,25 @@
     }
 
     function updateDigit(container, newDigit) {
-        const oldDigit = container.children[0];
+        // Find the current visible digit (prefer plain .digit without in/out)
+        const oldDigit = container.querySelector('.digit:not(.in):not(.out)') || container.querySelector('.digit');
         const newElement = document.createElement('span');
         newElement.className = 'digit in';
         newElement.textContent = newDigit;
 
+        // Append new digit and animate
         container.appendChild(newElement);
 
         setTimeout(() => {
-            if (oldDigit) oldDigit.className = 'digit out';
-            newElement.className = 'digit';
+            if (oldDigit) oldDigit.classList.add('out');
+            newElement.classList.remove('in');
         }, 50);
 
+        // Remove old digit and any extra children after animation
         setTimeout(() => {
-            if (oldDigit) oldDigit.remove();
+            if (oldDigit && oldDigit.parentNode) oldDigit.parentNode.removeChild(oldDigit);
+            // ensure only one child remains (safety)
+            while (container.children.length > 1) container.removeChild(container.firstChild);
         }, 450);
     }
 
@@ -45,6 +65,124 @@
         return num.toString().padStart(size, '0');
     }
 
+    // --- Confetti animation ---
+    let confettiRunning = false;
+    let confettiStopRequested = false;
+    function startConfetti(duration = 0) { // duration=0 => run indefinitely
+        if (confettiRunning) return;
+        confettiRunning = true;
+        confettiStopRequested = false;
+        const canvas = document.createElement('canvas');
+        canvas.className = 'confetti-canvas';
+        Object.assign(canvas.style, {
+            position: 'fixed', left: '0', top: '0', width: '100%', height: '100%',
+            pointerEvents: 'none', zIndex: '9999'
+        });
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resize(); window.addEventListener('resize', resize);
+
+        const colors = ['#ff0a54','#ff477e','#ff7096','#ff85a1','#fbb1bd','#f9bec7','#f6a6b2','#c9184a','#ff6b6b','#ffd166'];
+        const particles = [];
+        const count = 150;
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * -canvas.height,
+                vx: (Math.random() - 0.5) * 6,
+                vy: Math.random() * 3 + 2,
+                size: Math.random() * 8 + 4,
+                color: colors[(Math.random() * colors.length) | 0],
+                rot: Math.random() * 360,
+                vr: (Math.random() - 0.5) * 10
+            });
+        }
+
+        const start = performance.now();
+        function frame(now) {
+            const elapsed = now - start;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const p of particles) {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.rot += p.vr;
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+                ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                ctx.restore();
+                if (p.y > canvas.height + 20) { p.y = -10; p.x = Math.random() * canvas.width; p.vy = Math.random() * 3 + 2; }
+            }
+            if ((duration > 0 && elapsed < duration) || (duration === 0 && !confettiStopRequested)) {
+                requestAnimationFrame(frame);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                window.removeEventListener('resize', resize);
+                if (canvas && canvas.parentNode) canvas.parentNode.removeChild(canvas);
+                confettiRunning = false;
+                confettiStopRequested = false;
+            }
+        }
+
+        requestAnimationFrame(frame);
+    }
+
+    // Expose test helpers globally
+    window.startConfetti = startConfetti;
+    window.stopConfetti = function () { confettiStopRequested = true; };
+    window.setTestSeconds = function (s) {
+        const n = Number(s) | 0;
+        if (n >= 0) { testMode = true; testSeconds = n; testStart = Date.now(); if (!isSmallScreen()) ensureRunning(); }
+    };
+
+    // --- Small screen handling ---
+    const MIN_WIDTH = 915;
+    let mobileMessageEl = null;
+    function isSmallScreen() { return window.innerWidth < MIN_WIDTH; }
+
+    function ensureRunning() {
+        if (!intervalId) {
+            update();
+            intervalId = setInterval(update, 1000);
+        }
+    }
+
+    function stopRunning() {
+        if (intervalId) { clearInterval(intervalId); intervalId = null; }
+    }
+
+    function showMobileMessage() {
+        const timerContainer = document.querySelector('.timer-container');
+        const controls = document.querySelector('.controls');
+        if (timerContainer) timerContainer.style.display = 'none';
+        if (controls) controls.style.display = 'none';
+        if (!mobileMessageEl) {
+            mobileMessageEl = document.createElement('div');
+            mobileMessageEl.className = 'mobile-message';
+            mobileMessageEl.style.cssText = 'color:white;font-family:Orbitron, sans-serif;font-size:20px;text-align:center;padding:20px;';
+            mobileMessageEl.textContent = "Cette superposition n'est pas prise en charge sur les petits écrans. Veuillez utiliser un écran d'au moins 915px de largeur.";
+            document.body.appendChild(mobileMessageEl);
+        }
+    }
+
+    function hideMobileMessage() {
+        const timerContainer = document.querySelector('.timer-container');
+        const controls = document.querySelector('.controls');
+        if (timerContainer) timerContainer.style.display = '';
+        if (controls) controls.style.display = '';
+        if (mobileMessageEl && mobileMessageEl.parentNode) {
+            mobileMessageEl.parentNode.removeChild(mobileMessageEl);
+            mobileMessageEl = null;
+        }
+    }
+
+    function checkScreen() {
+        if (isSmallScreen()) {
+            stopRunning();
+            showMobileMessage();
+        } else {
+            hideMobileMessage();
+            ensureRunning();
+        }
+    }
+
     function renderInitial(days, hours, minutes, seconds) {
         const timeArr = formatHMS(hours, minutes, seconds);
         let prefix = '';
@@ -55,8 +193,14 @@
 
     function update() {
         const now = new Date();
-        const target = getNextJan1();
-        let diff = Math.max(0, Math.floor((target - now) / 1000));
+        let diff = 0;
+        if (testMode) {
+            const elapsed = Math.floor((Date.now() - testStart) / 1000);
+            diff = Math.max(0, testSeconds - elapsed);
+        } else {
+            const target = getNextJan1();
+            diff = Math.max(0, Math.floor((target - now) / 1000));
+        }
 
         const days = Math.floor(diff / 86400);
         diff -= days * 86400;
@@ -103,7 +247,7 @@
 
         currentTime = newTime;
 
-        if (target - now <= 0) {
+        if (diff <= 0) {
             const ds = display.querySelector('.days');
             if (ds) ds.textContent = '0j ';
             const zeros = formatHMS(0, 0, 0);
@@ -114,6 +258,8 @@
                 if (c) updateDigit(c, zeros[i]);
                 idx++;
             }
+            // lancement des confettis
+            try { startConfetti(15000); } catch (e) { console.warn('Confetti failed', e); }
             if (intervalId) {
                 clearInterval(intervalId);
                 intervalId = null;
@@ -121,10 +267,15 @@
         }
     }
 
-    update();
-    intervalId = setInterval(update, 1000);
+    // Start only if screen large enough; listen for resize
+    checkScreen();
+
+    window.addEventListener('resize', checkScreen);
+    window.addEventListener('orientationchange', checkScreen);
 
     document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) update();
+        if (!document.hidden) {
+            if (!isSmallScreen()) update();
+        }
     });
 })();
