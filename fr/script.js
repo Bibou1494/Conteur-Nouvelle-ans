@@ -133,7 +133,7 @@
     };
 
     // --- Small screen handling ---
-    const MIN_WIDTH = 915;
+    const MIN_WIDTH = 880;
     let mobileMessageEl = null;
     function isSmallScreen() { return window.innerWidth < MIN_WIDTH; }
 
@@ -157,7 +157,7 @@
             mobileMessageEl = document.createElement('div');
             mobileMessageEl.className = 'mobile-message';
             mobileMessageEl.style.cssText = 'color:white;font-family:Orbitron, sans-serif;font-size:20px;text-align:center;padding:20px;';
-            mobileMessageEl.textContent = "Cette superposition n'est pas prise en charge sur les petits écrans. Veuillez utiliser un écran d'au moins 915px de largeur.";
+            mobileMessageEl.textContent = "Cette superposition n'est pas prise en charge sur les petits écrans. Veuillez utiliser un écran d'au moins 880px de largeur.";
             document.body.appendChild(mobileMessageEl);
         }
     }

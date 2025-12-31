@@ -134,7 +134,7 @@
     };
 
     // --- Small screen handling ---
-    const MIN_WIDTH = 915;
+    const MIN_WIDTH = 880;
     let mobileMessageEl = null;
     function isSmallScreen() { return window.innerWidth < MIN_WIDTH; }
 
@@ -160,7 +160,7 @@
             mobileMessageEl = document.createElement('div');
             mobileMessageEl.className = 'mobile-message';
             mobileMessageEl.style.cssText = 'color:white;font-family:Orbitron, sans-serif;font-size:20px;text-align:center;padding:20px;';
-            mobileMessageEl.textContent = 'This overlay is not supported on small screens. Please use a desktop with width ≥ 915px.';
+            mobileMessageEl.textContent = 'This overlay is not supported on small screens. Please use a desktop with width ≥ 880px.';
             document.body.appendChild(mobileMessageEl);
         }
     }
